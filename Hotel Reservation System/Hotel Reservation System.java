@@ -24,12 +24,10 @@ public class HotelReservationSystem {
                     System.out.println("Image loaded successfully: " + imageUrl);
                 } else {
                     System.err.println("Image not found at: /Hotel.jpg");
-                    setBackground(new Color(240, 240, 240));
                 }
             } catch (IOException e) {
                 System.err.println("Error loading image:");
                 e.printStackTrace();
-                setBackground(Color.ORANGE);
             }
             setOpaque(!imageLoaded);
         }
@@ -63,7 +61,7 @@ public class HotelReservationSystem {
                 + "is_ac BOOLEAN NOT NULL, "
                 + "is_available BOOLEAN DEFAULT TRUE)");
             
-            // Create reservations table (corrected name)
+            // Create reservations table
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS reservations ("
                 + "reservation_id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "guest_name VARCHAR(100) NOT NULL, "
@@ -77,12 +75,13 @@ public class HotelReservationSystem {
                 + "reservation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                 + "FOREIGN KEY (room_number) REFERENCES rooms(room_number))");
             
-            // Check if rooms table is empty
+            // Checking room table is empty or not 
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM rooms");
             rs.next();
             int count = rs.getInt(1);
             
-            if (count == 0) {  // Corrected condition
+            if (count == 0)
+            {
                 stmt.executeUpdate("INSERT INTO rooms VALUES (101, 'Standard (Non-AC)', false, true)");
                 stmt.executeUpdate("INSERT INTO rooms VALUES (102, 'Standard (AC)', true, true)");
                 stmt.executeUpdate("INSERT INTO rooms VALUES (103, 'Deluxe (Non-AC)', false, true)");
@@ -92,52 +91,26 @@ public class HotelReservationSystem {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Database connection failed: " + e.getMessage());
-            e.printStackTrace();  // Add this for debugging
+            e.printStackTrace(); 
             System.exit(1);
         }
     }
-           
-    // Check room availability
-    private boolean isRoomAvailable(int roomNumber) {
-        try {
-            // First check if room exists
-            String checkSql = "SELECT 1 FROM rooms WHERE room_number = ?";
-            PreparedStatement checkStmt = connection.prepareStatement(checkSql);
-            checkStmt.setInt(1, roomNumber);
-            if (!checkStmt.executeQuery().next()) {
-                System.out.println("Room " + roomNumber + " doesn't exist");
-                return false;
-            }
-            
-            // Then check availability
-            String availSql = "SELECT is_available FROM rooms WHERE room_number = ?";
-            PreparedStatement availStmt = connection.prepareStatement(availSql);
-            availStmt.setInt(1, roomNumber);
-            ResultSet rs = availStmt.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getBoolean("is_available");
-            }
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        Dimension buttonSize = new Dimension(180, 40);
+        button.setMinimumSize(buttonSize);
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+        button.setBackground(new Color(255, 255, 255, 200));
+        button.setFont(new Font("Arial", Font.PLAIN, 12));
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(0, 0, 200), 1),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        button.setFocusPainted(false);
+        return button;
     }
-    
-    // Update room availability
-    private void setRoomAvailability(int roomNumber, boolean isAvailable) {
-        try {
-            String sql = "UPDATE rooms SET is_available = ? WHERE room_number = ?";
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setBoolean(1, isAvailable);
-            stmt.setInt(2, roomNumber);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(frame, "Error updating room status: " + e.getMessage());
-        }
-    }
-    
+
     private void initializeUI() {
         frame = new JFrame("Hotel Reservation System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -222,23 +195,54 @@ public class HotelReservationSystem {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        Dimension buttonSize = new Dimension(180, 40);
-        button.setMinimumSize(buttonSize);
-        button.setPreferredSize(buttonSize);
-        button.setMaximumSize(buttonSize);
-        button.setBackground(new Color(255, 255, 255, 200));
-        button.setFont(new Font("Arial", Font.PLAIN, 12));
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(0, 0, 200), 1),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-        button.setFocusPainted(false);
-        return button;
+  
+    // Check room availability
+    private boolean isRoomAvailable(int roomNumber) {
+        try {
+            // First check if room exists
+            String checkSql = "SELECT*FROM rooms WHERE room_number = ?";
+            PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+            checkStmt.setInt(1, roomNumber);
+            if (!checkStmt.executeQuery().next()) {
+                System.out.println("Room " + roomNumber + " doesn't exist");
+                return false;
+            }
+            
+            // Then check availability
+            String availSql = "SELECT is_available FROM rooms WHERE room_number = ?";
+            PreparedStatement availStmt = connection.prepareStatement(availSql);
+            availStmt.setInt(1, roomNumber);
+            ResultSet rs = availStmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getBoolean("is_available");
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-    
+  
+    private void setRoomAvailability(int roomNumber, boolean isAvailable) {
+        try {
+            String sql = "UPDATE rooms SET is_available = ? WHERE room_number = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setBoolean(1, isAvailable);
+            stmt.setInt(2, roomNumber);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frame, "Error updating room status: " + e.getMessage());
+        }
+    }
+ // mapping of room prices
+    private final Map<String, Integer> ROOM_PRICES = new HashMap<String, Integer>() {{
+        put("Standard (Non-AC)", 1000);
+        put("Standard (AC)", 1500);
+        put("Deluxe (Non-AC)", 1500);
+        put("Deluxe (AC)", 2000);
+        put("Suite (AC)", 3000);
+    }};
     private void updatePrice(JSpinner nightsSpinner, JComboBox<String> roomTypeCombo, JLabel priceLabel) {
         try {
             int nights = (Integer)nightsSpinner.getValue();
@@ -257,14 +261,7 @@ public class HotelReservationSystem {
             priceLabel.setText("Calculating...");
         }
     }
-    // Room prices mapping
-    private final Map<String, Integer> ROOM_PRICES = new HashMap<String, Integer>() {{
-        put("Standard (Non-AC)", 1000);
-        put("Standard (AC)", 1500);
-        put("Deluxe (Non-AC)", 1500);
-        put("Deluxe (AC)", 2000);
-        put("Suite (AC)", 3000);
-    }};
+  //reservation form
     private void showReservationForm() {
     	JPanel panel = new JPanel(new GridLayout(10, 2, 10, 10)); 
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -278,6 +275,7 @@ public class HotelReservationSystem {
         JLabel priceLabel = new JLabel();
         JLabel availabilityLabel = new JLabel("Check availability");
         availabilityLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
         
         JButton checkAvailButton = new JButton("Check Availability");
         checkAvailButton.addActionListener(e -> {
@@ -322,6 +320,7 @@ public class HotelReservationSystem {
         panel.add(new JLabel("Payment Method:"));
         panel.add(paymentCombo);
 
+        
         int result = JOptionPane.showConfirmDialog(frame, panel, "Reserve a Room", 
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -350,7 +349,7 @@ public class HotelReservationSystem {
                 connection.setAutoCommit(false);
                 
                 try {
-                    // Insert reservation
+                    // Insert reservation details into reservation table
                     String sql = "INSERT INTO reservations (reservation_id,guest_name, room_number, room_type, " +
                                "contact_number, payment_method, total_price, nights, is_ac) " +
                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
@@ -366,7 +365,6 @@ public class HotelReservationSystem {
                     stmt.setBoolean(9, roomType.contains("AC"));
                     stmt.executeUpdate();
                     
-                    // Mark room as unavailable
                     setRoomAvailability(roomNumber, false);
                     
                     connection.commit();
@@ -384,13 +382,12 @@ public class HotelReservationSystem {
             }
         }
     }
+    //view reservations
     
     private void viewReservations() {
         try {
-            // Create a panel with tabbed view
             JTabbedPane tabbedPane = new JTabbedPane();
             
-            // Tab 1: Current Reservations
             JPanel reservationsPanel = new JPanel(new BorderLayout());
             String sql = "SELECT r.reservation_id, r.guest_name, r.room_number, r.room_type, " +
                        "r.contact_number, r.payment_method, r.total_price, r.nights, " +
@@ -401,6 +398,7 @@ public class HotelReservationSystem {
             try (Statement stmt = connection.createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
                 
+            	//create html table
                 StringBuilder sb = new StringBuilder();
                 sb.append("<html><table border='1'><tr>")
                   .append("<th>ID</th><th>Guest</th><th>Room</th><th>Type</th><th>Contact</th>")
@@ -432,7 +430,6 @@ public class HotelReservationSystem {
                 reservationsPanel.add(scrollPane, BorderLayout.CENTER);
             }
             
-            // Tab 2: Room Availability (101-105)
             JPanel roomAvailabilityPanel = new JPanel(new BorderLayout());
             String roomSql = "SELECT room_number, room_type, is_available FROM rooms WHERE room_number BETWEEN 101 AND 105 ORDER BY room_number";
             
@@ -471,6 +468,7 @@ public class HotelReservationSystem {
             JOptionPane.showMessageDialog(frame, "Database error: " + e.getMessage());
         }
     }
+    //find room number
     private void findRoomNumber() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -517,6 +515,7 @@ public class HotelReservationSystem {
             }
         }
     }
+    //update reservation
     
     private void updateReservation() {
         JPanel panel = new JPanel(new GridLayout(10, 2, 10, 10));
@@ -611,13 +610,13 @@ public class HotelReservationSystem {
                     
                     int currentRoomNumber = rs.getInt("room_number");
                     
-                    // Check if new room is available (if changing rooms)
+                    // Check if new room is available
                     if (newRoomNumber != currentRoomNumber && !isRoomAvailable(newRoomNumber)) {
                         JOptionPane.showMessageDialog(frame, "New room " + newRoomNumber + " is not available!");
                         return;
                     }
                     
-                    // Update reservation
+                    // Update reservation in database
                     String updateSql = "UPDATE reservations SET guest_name = ?, room_number = ?, contact_number = ?, " +
                                      "room_type = ?, payment_method = ?, total_price = ?, nights = ?, is_ac = ? " +
                                      "WHERE reservation_id = ?";
@@ -635,9 +634,9 @@ public class HotelReservationSystem {
                     
                     // Update room availability status if room number changed
                     if (newRoomNumber != currentRoomNumber) {
-                        // Mark old room as available
+                        
                         setRoomAvailability(currentRoomNumber, true);
-                        // Mark new room as unavailable
+                        
                         setRoomAvailability(newRoomNumber, false);
                     }
                     
@@ -656,7 +655,8 @@ public class HotelReservationSystem {
             }
         }
     }
-
+//cancle reservation
+    
     private void cancelReservation() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -695,20 +695,21 @@ public class HotelReservationSystem {
                         String paymentMethod = rs.getString("payment_method");
                         double amount = rs.getDouble("total_price");
                         
+                        //create confirm box to confirm user cancle reservation or not
                         int confirm = JOptionPane.showConfirmDialog(frame, 
                             "This reservation was paid via " + paymentMethod + " for ₹" + amount + 
                             "\nAre you sure you want to cancel?", 
                             "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
                         
+                        //if user select yes option then delete reservation
                         if (confirm == JOptionPane.YES_OPTION) {
-                            // Delete reservation
                             String deleteSql = "DELETE FROM reservations WHERE reservation_id = ? AND guest_name = ?";
                             PreparedStatement deleteStmt = connection.prepareStatement(deleteSql);
                             deleteStmt.setInt(1, reservationId);
                             deleteStmt.setString(2, guestName);
                             deleteStmt.executeUpdate();
                             
-                            // Mark room as available again
+                        
                             setRoomAvailability(roomNumber, true);
                             
                             connection.commit();
