@@ -131,7 +131,7 @@ public class HotelReservationSystem {
         welcomeContainer.setOpaque(false);
         
         JLabel resortLabel = new JLabel("Moonlight Resort");
-        resortLabel.setFont(new Font("calibari", Font.BOLD | Font.ITALIC, 28));
+        resortLabel.setFont(new Font("calibri", Font.BOLD | Font.ITALIC, 28));
         resortLabel.setForeground(new Color(255, 215, 0));
         resortLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
@@ -157,13 +157,13 @@ public class HotelReservationSystem {
         JButton deleteButton = createStyledButton("Cancel Reservation");
         JButton exitButton = createStyledButton("Exit");
         
-        Dimension xlbuttonSize = new Dimension(800,50);
-        reserveButton.setMaximumSize(xlbuttonSize);
-        viewButton.setMaximumSize(xlbuttonSize);
-        findButton.setMaximumSize(xlbuttonSize);
-        updateButton.setMaximumSize(xlbuttonSize);
-        deleteButton.setMaximumSize(xlbuttonSize);
-        exitButton.setMaximumSize(xlbuttonSize);
+        Dimension xlButtonSize = new Dimension(800,50);
+        reserveButton.setMaximumSize(xlButtonSize);
+        viewButton.setMaximumSize(xlButtonSize);
+        findButton.setMaximumSize(xlButtonSize);
+        updateButton.setMaximumSize(xlButtonSize);
+        deleteButton.setMaximumSize(xlButtonSize);
+        exitButton.setMaximumSize(xlButtonSize);
         
         reserveButton.addActionListener(e -> showReservationForm());
         viewButton.addActionListener(e -> viewReservations());
@@ -655,7 +655,7 @@ public class HotelReservationSystem {
             }
         }
     }
-//cancle reservation
+//cancel reservation
     
     private void cancelReservation() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
@@ -695,7 +695,7 @@ public class HotelReservationSystem {
                         String paymentMethod = rs.getString("payment_method");
                         double amount = rs.getDouble("total_price");
                         
-                        //create confirm box to confirm user cancle reservation or not
+                        //create confirm box to confirm user cancel reservation or not
                         int confirm = JOptionPane.showConfirmDialog(frame, 
                             "This reservation was paid via " + paymentMethod + " for ₹" + amount + 
                             "\nAre you sure you want to cancel?", 
@@ -703,6 +703,7 @@ public class HotelReservationSystem {
                         
                         //if user select yes option then delete reservation
                         if (confirm == JOptionPane.YES_OPTION) {
+                            // Delete reservation
                             String deleteSql = "DELETE FROM reservations WHERE reservation_id = ? AND guest_name = ?";
                             PreparedStatement deleteStmt = connection.prepareStatement(deleteSql);
                             deleteStmt.setInt(1, reservationId);
